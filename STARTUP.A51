@@ -1,87 +1,65 @@
-		CSEG AT 0x0000	
-		MOV R2, #2; this is to limit the number to n digits!!!!!!!! (n)----------------
+		CSEG AT 0x0000			
+			
+	
+INIT:	
 		MOV R6, #0; for remember add(1) or sub(2) or equal(3)
+		MOV R2, #0
 		
-BEGIN:	;r2,3
+BEGIN:	
 		MOV A, #0 ;row
 		MOV R3, #0 ; i
 		
-SCAN:	
-		MOV A, R3
-		MOV DPTR, #ScanCode
-		MOVC A, @A+DPTR
-		MOV P0, A
-		MOV A,P0 ;when press A has a different resalt
-		ANL A,#0xf0
-		
-		CJNE A, #0xe0, T
-		MOV R0, #0
-		SJMP COUNT
-		
-T:      CJNE A, #0xd0, T2
-		MOV R0, #1
-		SJMP COUNT
-		
-T2:     CJNE A, #0xb0, T3
-		MOV R0, #2
-		SJMP COUNT
-		
-T3:     CJNE A, #0x70, T4
-		MOV R0, #3
-		SJMP COUNT
-		
-T4: 	
+		MOV A, #0xA0
+		MOV R1, A
+		MOV A, #0x3
+		MOV @R1, A
+		INC R1
+		MOV A, #0x0
+		MOV @R1, A
+		INC R1
+		MOV A, #0x5
+		MOV @R1, A
+		INC R1
+		MOV A, #0x6
+		MOV @R1, A
 		ACALL Display
-		SJMP Default
-
-
-COUNT:		
-		MOV A, R0 ; put key=1,2,3,4 to A
-		RL A      ; key*2
-		RL A      ; key*4
-		ADD A, R3 ; key*4 + i ;A can select which number 
-		MOV B, A ; B = A	
-		CJNE R2, #2, Handle1 ; no number no disaply
-		CJNE A, #0, Handle1  ; first number is zero no disaply
-		SJMP Default		
-
-Default: 
-		INC R3
-		CJNE R3,#4,SCAN
 		SJMP BEGIN
 		
-Handle1:
-		MOV R4, #0XA0
-		ACALL ProcessNum
-		SJMP Default
-
-
-
-ProcessNum: ; at most push 2 number
-		CJNE R2, #0, Pr1 ; if r2 is zero, it means don't put more digits in
-		ACALL Display
+Display:
+		MOV A, #0
+		MOV R2, A
+		MOV A, #6 ; this number should modify !!!!!!!!!!! 8-n
+		MOV R0, A ;move # to the left
+		MOV B, #0
+		MOV A, #0xA0
+		MOV R4, A
+E1:		
+		MOV A, R4 ;r4 is address
+		MOV R1, A
+		MOV A, B		
+		ADD A, R1
+		MOV R1, A
+		MOV A, @R1
+		JZ E3
+		
+E5:		ACALL ShowNum
+		
+E2:		INC B
+		INC R0
+		MOV A, B
+		CJNE A, #2, E1 ; this number should modify !!!!!!!!!!! n
 		RET
 		
-Pr1:
-Display:
-		JZ Default ; if A is zero, it means no number is given
-		
-		CLR C
-		MOV A, #7
-		MOV R0, A ;move # to the left
-		
-		ACALL ShowNum
-E3:		RET
-		
+E3:		CJNE R2, #0, E5
+		SJMP E2
 		
 
 
 /**************************************/
-
 ShowNum:
         MOV DPTR,#TABLE
 		MOV P1,R0 ; which led will be light
-		MOV A, B
+		INC R2
 		MOVC A,@A+DPTR
 		
 L0:		
@@ -89,11 +67,10 @@ L0:
 		ACALL DELAY
 		RET
 		
-DELAY: 
-		MOV R1, #0xff
-		DJNZ R1, $
+DELAY:	MOV R7,#0XFF		
+LOOP1:	DJNZ R7,LOOP1
 		RET
-		
+			
 TABLE:  
 		DB 3fh ;0
 	    DB 06h ;1
@@ -106,12 +83,5 @@ TABLE:
 		DB 7fh ;8
 		DB 6fh ;9
 			
-ScanCode:
-		DB 11111110B ;0xfe
-		DB 11111101B ;0xfd
-		DB 11111011B ;0xfb
-		DB 11110111B ;0xf7
-
-
-		END		
+		END	
 			

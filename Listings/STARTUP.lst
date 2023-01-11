@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  STARTUP                                                              01/11/2023 16:47:10 PAGE     1
+A51 MACRO ASSEMBLER  STARTUP                                                              01/11/2023 22:55:33 PAGE     1
 
 
 MACRO ASSEMBLER A51 V8.2.7.0
@@ -8,127 +8,96 @@ ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE STARTUP.A51 SET(SMALL) DEBUG PR
 
 LOC  OBJ            LINE     SOURCE
 
-----                   1                     CSEG AT 0x0000  
-0000 7A02              2                     MOV R2, #2; this is to limit the number to n digits!!!!!!!! (n)------------
-                             ----
-0002 7E00              3                     MOV R6, #0; for remember add(1) or sub(2) or equal(3)
-                       4                     
-0004                   5     BEGIN:  ;r2,3
-0004 7400              6                     MOV A, #0 ;row
-0006 7B00              7                     MOV R3, #0 ; i
-                       8                     
-0008                   9     SCAN:   
-0008 EB               10                     MOV A, R3
-0009 900078           11                     MOV DPTR, #ScanCode
-000C 93               12                     MOVC A, @A+DPTR
-000D F580             13                     MOV P0, A
-000F E580             14                     MOV A,P0 ;when press A has a different resalt
-0011 54F0             15                     ANL A,#0xf0
-                      16                     
-0013 B4E004           17                     CJNE A, #0xe0, T
-0016 7800             18                     MOV R0, #0
-0018 8019             19                     SJMP COUNT
-                      20                     
-001A B4D004           21     T:      CJNE A, #0xd0, T2
-001D 7801             22                     MOV R0, #1
-001F 8012             23                     SJMP COUNT
-                      24                     
-0021 B4B004           25     T2:     CJNE A, #0xb0, T3
-0024 7802             26                     MOV R0, #2
-0026 800B             27                     SJMP COUNT
-                      28                     
-0028 B47004           29     T3:     CJNE A, #0x70, T4
-002B 7803             30                     MOV R0, #3
-002D 8004             31                     SJMP COUNT
-                      32                     
-002F                  33     T4:     
-002F 1153             34                     ACALL Display
-0031 800E             35                     SJMP Default
-                      36     
-                      37     
-0033                  38     COUNT:          
-0033 E8               39                     MOV A, R0 ; put key=1,2,3,4 to A
-0034 23               40                     RL A      ; key*2
-0035 23               41                     RL A      ; key*4
-0036 2B               42                     ADD A, R3 ; key*4 + i ;A can select which number 
-0037 F5F0             43                     MOV B, A ; B = A        
-0039 BA020B           44                     CJNE R2, #2, Handle1 ; no number no disaply
-003C B40008           45                     CJNE A, #0, Handle1  ; first number is zero no disaply
-003F 8000             46                     SJMP Default            
-                      47     
-0041                  48     Default: 
-0041 0B               49                     INC R3
-0042 BB04C3           50                     CJNE R3,#4,SCAN
-0045 80BD             51                     SJMP BEGIN
+----                   1                     CSEG AT 0x0000                  
+                       2                             
+                       3             
+0000                   4     INIT:   
+0000 7E00              5                     MOV R6, #0; for remember add(1) or sub(2) or equal(3)
+0002 7A00              6                     MOV R2, #0
+                       7                     
+0004                   8     BEGIN:  
+0004 7400              9                     MOV A, #0 ;row
+0006 7B00             10                     MOV R3, #0 ; i
+                      11                     
+0008 74A0             12                     MOV A, #0xA0
+000A F9               13                     MOV R1, A
+000B 7403             14                     MOV A, #0x3
+000D F7               15                     MOV @R1, A
+000E 09               16                     INC R1
+000F 7400             17                     MOV A, #0x0
+0011 F7               18                     MOV @R1, A
+0012 09               19                     INC R1
+0013 7405             20                     MOV A, #0x5
+0015 F7               21                     MOV @R1, A
+0016 09               22                     INC R1
+0017 7406             23                     MOV A, #0x6
+0019 F7               24                     MOV @R1, A
+001A 111E             25                     ACALL Display
+001C 80E6             26                     SJMP BEGIN
+                      27                     
+001E                  28     Display:
+001E 7400             29                     MOV A, #0
+0020 FA               30                     MOV R2, A
+0021 7406             31                     MOV A, #6 ; this number should modify !!!!!!!!!!! 8-n
+0023 F8               32                     MOV R0, A ;move # to the left
+0024 75F000           33                     MOV B, #0
+0027 74A0             34                     MOV A, #0xA0
+0029 FC               35                     MOV R4, A
+002A                  36     E1:             
+002A EC               37                     MOV A, R4 ;r4 is address
+002B F9               38                     MOV R1, A
+002C E5F0             39                     MOV A, B                
+002E 29               40                     ADD A, R1
+002F F9               41                     MOV R1, A
+0030 E7               42                     MOV A, @R1
+0031 600B             43                     JZ E3
+                      44                     
+0033 1143             45     E5:             ACALL ShowNum
+                      46                     
+0035 05F0             47     E2:             INC B
+0037 08               48                     INC R0
+0038 E5F0             49                     MOV A, B
+003A B402ED           50                     CJNE A, #2, E1 ; this number should modify !!!!!!!!!!! n
+003D 22               51                     RET
                       52                     
-0047                  53     Handle1:
-0047 7CA0             54                     MOV R4, #0XA0
-0049 114D             55                     ACALL ProcessNum
-004B 80F4             56                     SJMP Default
-A51 MACRO ASSEMBLER  STARTUP                                                              01/11/2023 16:47:10 PAGE     2
-
+003E BA00F2           53     E3:             CJNE R2, #0, E5
+0041 80F2             54                     SJMP E2
+                      55                     
+                      56     
                       57     
+A51 MACRO ASSEMBLER  STARTUP                                                              01/11/2023 22:55:33 PAGE     2
+
                       58     
-                      59     
-004D                  60     ProcessNum: ; at most push 2 number
-004D BA0003           61                     CJNE R2, #0, Pr1 ; if r2 is zero, it means don't put more digits in
-0050 1153             62                     ACALL Display
-0052 22               63                     RET
+0043                  59     ShowNum:
+0043 900054           60             MOV DPTR,#TABLE
+0046 8890             61                     MOV P1,R0 ; which led will be light
+0048 0A               62                     INC R2
+0049 93               63                     MOVC A,@A+DPTR
                       64                     
-0053                  65     Pr1:
-0053                  66     Display:
-0053 60EC             67                     JZ Default ; if A is zero, it means no number is given
-                      68                     
-0055 C3               69                     CLR C
-0056 7407             70                     MOV A, #7
-0058 F8               71                     MOV R0, A ;move # to the left
-                      72                     
-0059 115C             73                     ACALL ShowNum
-005B 22               74     E3:             RET
-                      75                     
-                      76                     
-                      77     
-                      78     
-                      79     
-                      80     
-005C                  81     ShowNum:
-005C 90006E           82             MOV DPTR,#TABLE
-005F 8890             83                     MOV P1,R0 ; which led will be light
-0061 E5F0             84                     MOV A, B
-0063 93               85                     MOVC A,@A+DPTR
-                      86                     
-0064                  87     L0:             
-0064 F5A0             88                     MOV P2,A
-0066 1169             89                     ACALL DELAY
-0068 22               90                     RET
-                      91                     
-0069                  92     DELAY: 
-0069 79FF             93                     MOV R1, #0xff
-006B D9FE             94                     DJNZ R1, $
-006D 22               95                     RET
-                      96                     
-006E                  97     TABLE:  
-006E 3F               98                     DB 3fh ;0
-006F 06               99                 DB 06h ;1
-0070 5B              100                 DB 5bh ;2
-0071 4F              101                 DB 4fh ;3
-0072 66              102                 DB 66h ;4
-0073 6D              103                 DB 6dh ;5
-0074 7D              104             DB 7dh ;6
-0075 07              105                 DB 07h ;7
-0076 7F              106                     DB 7fh ;8
-0077 6F              107                     DB 6fh ;9
-                     108                             
-0078                 109     ScanCode:
-0078 FE              110                     DB 11111110B ;0xfe
-0079 FD              111                     DB 11111101B ;0xfd
-007A FB              112                     DB 11111011B ;0xfb
-007B F7              113                     DB 11110111B ;0xf7
-                     114     
-                     115     
-                     116                     END             
+004A                  65     L0:             
+004A F5A0             66                     MOV P2,A
+004C 114F             67                     ACALL DELAY
+004E 22               68                     RET
+                      69                     
+004F 7FFF             70     DELAY:  MOV R7,#0XFF            
+0051 DFFE             71     LOOP1:  DJNZ R7,LOOP1
+0053 22               72                     RET
+                      73                             
+0054                  74     TABLE:  
+0054 3F               75                     DB 3fh ;0
+0055 06               76                 DB 06h ;1
+0056 5B               77                 DB 5bh ;2
+0057 4F               78                 DB 4fh ;3
+0058 66               79                 DB 66h ;4
+0059 6D               80                 DB 6dh ;5
+005A 7D               81             DB 7dh ;6
+005B 07               82                 DB 07h ;7
+005C 7F               83                     DB 7fh ;8
+005D 6F               84                     DB 6fh ;9
+                      85                             
+                      86                     END     
                                                      
-A51 MACRO ASSEMBLER  STARTUP                                                              01/11/2023 16:47:10 PAGE     3
+A51 MACRO ASSEMBLER  STARTUP                                                              01/11/2023 22:55:33 PAGE     3
 
 SYMBOL TABLE LISTING
 ------ ----- -------
@@ -138,26 +107,19 @@ N A M E             T Y P E  V A L U E   ATTRIBUTES
 
 B. . . . . . . . .  D ADDR   00F0H   A   
 BEGIN. . . . . . .  C ADDR   0004H   A   
-COUNT. . . . . . .  C ADDR   0033H   A   
-DEFAULT. . . . . .  C ADDR   0041H   A   
-DELAY. . . . . . .  C ADDR   0069H   A   
-DISPLAY. . . . . .  C ADDR   0053H   A   
-E3 . . . . . . . .  C ADDR   005BH   A   
-HANDLE1. . . . . .  C ADDR   0047H   A   
-L0 . . . . . . . .  C ADDR   0064H   A   
-P0 . . . . . . . .  D ADDR   0080H   A   
+DELAY. . . . . . .  C ADDR   004FH   A   
+DISPLAY. . . . . .  C ADDR   001EH   A   
+E1 . . . . . . . .  C ADDR   002AH   A   
+E2 . . . . . . . .  C ADDR   0035H   A   
+E3 . . . . . . . .  C ADDR   003EH   A   
+E5 . . . . . . . .  C ADDR   0033H   A   
+INIT . . . . . . .  C ADDR   0000H   A   
+L0 . . . . . . . .  C ADDR   004AH   A   
+LOOP1. . . . . . .  C ADDR   0051H   A   
 P1 . . . . . . . .  D ADDR   0090H   A   
 P2 . . . . . . . .  D ADDR   00A0H   A   
-PR1. . . . . . . .  C ADDR   0053H   A   
-PROCESSNUM . . . .  C ADDR   004DH   A   
-SCAN . . . . . . .  C ADDR   0008H   A   
-SCANCODE . . . . .  C ADDR   0078H   A   
-SHOWNUM. . . . . .  C ADDR   005CH   A   
-T. . . . . . . . .  C ADDR   001AH   A   
-T2 . . . . . . . .  C ADDR   0021H   A   
-T3 . . . . . . . .  C ADDR   0028H   A   
-T4 . . . . . . . .  C ADDR   002FH   A   
-TABLE. . . . . . .  C ADDR   006EH   A   
+SHOWNUM. . . . . .  C ADDR   0043H   A   
+TABLE. . . . . . .  C ADDR   0054H   A   
 
 
 REGISTER BANK(S) USED: 0 
